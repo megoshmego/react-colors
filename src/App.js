@@ -1,25 +1,61 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate, useParams, useNavigate } from 'react-router-dom';
+import NewColorForm from './NewColorForm';
 
-function App() {
+
+
+const ColorsApp = () => {
+  const [colors, setColors] = useState([
+    { name: 'Blue', color: 'blue' },
+    { name: 'Red', color: 'red' },
+    { name: 'Green', color: 'green' },
+  ]);
+
+  const addColor = (color) => {
+    setColors([color, ...colors]);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/colors" element={<ColorsList colors={colors} />} />
+        <Route path="/colors/new" element={<NewColorForm addColor={addColor} />} />
+        <Route path="/colors/:color" element={<ColorDisplay colors={colors} />} />
+        <Route path="*" element={<Navigate to="/colors" replace />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
-export default App;
+const ColorsList = ({ colors }) => (
+  <ul>
+    {colors.map((color, index) => (
+      <li key={index}>
+        <a href={`/colors/${color.name}`}>{color.name}</a>
+      </li>
+    ))}
+    <li>
+      <a href="/colors/new">Add a color</a>
+    </li>
+  </ul>
+);
+
+const ColorDisplay = ({ colors }) => {
+  const { color } = useParams();
+  const navigate = useNavigate();
+
+  const colorObj = colors.find((c) => c.name === color);
+  if (colorObj) {
+    return (
+      <div style={{ backgroundColor: colorObj.color, height: '100vh', width: '100vw' }}>
+        <button onClick={() => navigate(-1)}>Go Back</button>
+      </div>
+    );
+  } else {
+    return <Navigate to="/colors" replace />;
+  }
+};
+
+
+
+export default ColorsApp;
